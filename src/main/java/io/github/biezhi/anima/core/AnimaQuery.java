@@ -1235,11 +1235,17 @@ public class AnimaQuery<T extends Model> {
             List<Object> params = columnValues.stream()
                     .filter(Objects::nonNull)
                     .collect(toList());
-
-            return new ResultKey(conn.createQuery(sql)
+            if(Anima.of().getSql2o().getQuirks().returnGeneratedKeysByDefault()) {
+            	return new ResultKey(conn.createQuery(sql)
                     .withParams(params)
                     .executeUpdate()
                     .getKey());
+            }else {
+            	conn.createQuery(sql)
+                        .withParams(params)
+                        .executeUpdate();
+            	return null;
+            }
         } finally {
             this.closeConn(conn);
             this.clean(conn);
